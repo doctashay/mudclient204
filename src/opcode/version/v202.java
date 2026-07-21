@@ -6,7 +6,13 @@ import java.util.HashMap;
 
 public class v202 {
 
-    public static HashMap<Command.Client, Integer> client = new HashMap<Command.Client, Integer>() {{
+    private static class OpcodeMap extends HashMap {
+        public Object put(Object key, int value) {
+            return super.put(key, new Integer(value));
+        }
+    }
+
+    public static HashMap client = new OpcodeMap() {{
         put(Command.Client.CL_APPEARANCE, 218);
         put(Command.Client.CL_BANK_CLOSE, 48);
         put(Command.Client.CL_BANK_DEPOSIT, 198);
@@ -79,7 +85,7 @@ public class v202 {
         put(Command.Client.CL_USEWITH_WALLOBJECT, 36);
     }};
 
-    public static HashMap<Command.Server, Integer> server = new HashMap<Command.Server, Integer>() {{
+    public static HashMap server = new OpcodeMap() {{
         put(Command.Server.SV_APPEARANCE, 207);
         put(Command.Server.SV_BANK_CLOSE, 171);
         put(Command.Server.SV_BANK_OPEN, 93);

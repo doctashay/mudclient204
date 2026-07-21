@@ -1,4 +1,5 @@
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import javax.sound.sampled.AudioFormat;
@@ -36,22 +37,33 @@ public class StreamAudioPlayer {
 
     public synchronized void writeStream(byte buf[], int off, int len) {
         AudioInputStream ulawStream = new AudioInputStream(new ByteArrayInputStream(buf, off, len), ulawFormat, len);
-        AudioInputStream pcmStream = AudioSystem.getAudioInputStream(outputFormat, ulawStream);
+        final AudioInputStream pcmStream = AudioSystem.getAudioInputStream(outputFormat, ulawStream);
 
-        new Thread(() -> {
-            try {
-                byte[] pcmBytes = pcmStream.readAllBytes();
-                sourceLine.start();
-                sourceLine.write(pcmBytes, 0, pcmBytes.length);
-                sourceLine.drain();
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[4096];
+                    int read;
+                    while ((read = pcmStream.read(buffer)) != -1) {
+                        out.write(buffer, 0, read);
+                    }
 
-                do { 
-                    Thread.sleep(100);
-                } while (sourceLine.isRunning());
+                    byte[] pcmBytes = out.toByteArray();
+                    sourceLine.start();
+                    sourceLine.write(pcmBytes, 0, pcmBytes.length);
+                    sourceLine.drain();
 
-                sourceLine.stop();
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
+                    do {
+                        Thread.sleep(100);
+                    } while (sourceLine.isRunning());
+
+                    sourceLine.stop();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
     }

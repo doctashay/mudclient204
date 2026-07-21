@@ -141,12 +141,12 @@ public class WordFilter {
     }
 
     public static void applyDotSlashFilter(char input[]) {
-        char input1[] = input.clone();
+        char input1[] = (char[])input.clone();
         char dot[] = {
                 'd', 'o', 't'
         };
         applyWordFilter(input1, dot, null);
-        char input2[] = input.clone();
+        char input2[] = (char[])input.clone();
         char slash[] = {
                 's', 'l', 'a', 's', 'h'
         };
